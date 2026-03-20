@@ -1,7 +1,8 @@
 import js from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
+import { defineConfig } from 'eslint/config';
 import prettier from 'eslint-config-prettier/flat';
-import importPlugin from 'eslint-plugin-import';
+import importX from 'eslint-plugin-import-x';
 import svelte from 'eslint-plugin-svelte';
 import ts from 'typescript-eslint';
 
@@ -22,10 +23,10 @@ const paddingAroundControl = [
     ]),
 ];
 
-export default ts.config(
+export default defineConfig(
     js.configs.recommended,
-    ...ts.configs.recommended,
-    ...svelte.configs['flat/recommended'],
+    ts.configs.recommended,
+    svelte.configs['flat/recommended'],
     {
         files: ['**/*.svelte'],
         languageOptions: {
@@ -42,7 +43,7 @@ export default ts.config(
     },
     {
         plugins: {
-            import: importPlugin,
+            import: importX,
         },
         settings: {
             'import/resolver': {
