@@ -1,28 +1,20 @@
 import { createInertiaApp } from '@inertiajs/svelte';
-import { hydrate, mount } from 'svelte';
-import '../css/app.css';
+import AppLayout from '@/layouts/AppLayout.svelte';
+import SettingsLayout from '@/layouts/settings/Layout.svelte';
 import { initializeTheme } from '@/lib/theme.svelte';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
-    resolve: (name) => {
-        const pages = import.meta.glob('./pages/**/*.svelte', {
-            eager: true,
-        });
-
-        return pages[`./pages/${name}.svelte`] as never;
-    },
-    setup({ el, App, props }) {
-        if (!el) {
-            return;
-        }
-
-        if (el.dataset.serverRendered === 'true') {
-            hydrate(App, { target: el, props });
-        } else {
-            mount(App, { target: el, props });
+    layout: (name) => {
+        switch (true) {
+            case name === 'Welcome':
+                return null;
+            case name.startsWith('settings/'):
+                return [AppLayout, SettingsLayout];
+            default:
+                return AppLayout;
         }
     },
     progress: {
