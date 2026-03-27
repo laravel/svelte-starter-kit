@@ -9,6 +9,7 @@
     import { edit as editAppearance } from '@/routes/appearance';
     import { edit as editProfile } from '@/routes/profile';
     import { edit as editSecurity } from '@/routes/security';
+    import { index as teams } from '@/routes/teams';
     import type { NavItem } from '@/types';
 
     let {
@@ -25,6 +26,10 @@
         {
             title: 'Security',
             href: editSecurity(),
+        },
+        {
+            title: 'Teams',
+            href: teams(),
         },
         {
             title: 'Appearance',
@@ -50,7 +55,7 @@
                 {#each sidebarNavItems as item (toUrl(item.href))}
                     <Button
                         variant="ghost"
-                        class="w-full justify-start {url.isCurrentUrl(
+                        class="w-full justify-start {url.isCurrentOrParentUrl(
                             item.href,
                             url.currentUrl,
                         )

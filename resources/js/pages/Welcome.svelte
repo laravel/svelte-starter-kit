@@ -3,6 +3,7 @@
     import AppHead from '@/components/AppHead.svelte';
     import { toUrl } from '@/lib/utils';
     import { dashboard, login, register } from '@/routes';
+    import type { Team } from '@/types';
 
     let {
         canRegister = true,
@@ -11,6 +12,10 @@
     } = $props();
 
     const auth = $derived(page.props.auth);
+    const currentTeam = $derived(page.props.currentTeam as Team | null);
+    const dashboardUrl = $derived(
+        currentTeam ? dashboard(currentTeam.slug) : '/',
+    );
 </script>
 
 <AppHead title="Welcome">
@@ -27,7 +32,7 @@
         <nav class="flex items-center justify-end gap-4">
             {#if auth.user}
                 <Link
-                    href={toUrl(dashboard())}
+                    href={toUrl(dashboardUrl)}
                     class="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
                 >
                     Dashboard
