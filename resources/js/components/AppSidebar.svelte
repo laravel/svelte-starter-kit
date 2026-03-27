@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Link } from '@inertiajs/svelte';
+    import { Link, page } from '@inertiajs/svelte';
     import BookOpen from 'lucide-svelte/icons/book-open';
     import FolderGit2 from 'lucide-svelte/icons/folder-git-2';
     import LayoutGrid from 'lucide-svelte/icons/layout-grid';
@@ -8,6 +8,7 @@
     import NavFooter from '@/components/NavFooter.svelte';
     import NavMain from '@/components/NavMain.svelte';
     import NavUser from '@/components/NavUser.svelte';
+    import TeamSwitcher from '@/components/TeamSwitcher.svelte';
     import {
         Sidebar,
         SidebarContent,
@@ -17,9 +18,8 @@
         SidebarMenuButton,
         SidebarMenuItem,
     } from '@/components/ui/sidebar';
-    import { toUrl } from '@/lib/utils';
     import { dashboard } from '@/routes';
-    import type { NavItem } from '@/types';
+    import type { NavItem, Team } from '@/types';
 
     let {
         children,
@@ -27,13 +27,18 @@
         children?: Snippet;
     } = $props();
 
-    const mainNavItems: NavItem[] = [
+    const currentTeam = $derived(page.props.currentTeam as Team | null);
+    const dashboardUrl = $derived(
+        currentTeam ? dashboard(currentTeam.slug) : '/',
+    );
+
+    const mainNavItems = $derived<NavItem[]>([
         {
             title: 'Dashboard',
-            href: dashboard(),
+            href: dashboardUrl,
             icon: LayoutGrid,
         },
-    ];
+    ]);
 
     const footerNavItems: NavItem[] = [
         {
@@ -57,13 +62,18 @@
                     {#snippet children(props)}
                         <Link
                             {...props}
-                            href={toUrl(dashboard())}
+                            href={dashboardUrl}
                             class={props.class}
                         >
                             <AppLogo />
                         </Link>
                     {/snippet}
                 </SidebarMenuButton>
+            </SidebarMenuItem>
+        </SidebarMenu>
+        <SidebarMenu>
+            <SidebarMenuItem>
+                <TeamSwitcher />
             </SidebarMenuItem>
         </SidebarMenu>
     </SidebarHeader>

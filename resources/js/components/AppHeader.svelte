@@ -8,6 +8,7 @@
     import AppLogo from '@/components/AppLogo.svelte';
     import AppLogoIcon from '@/components/AppLogoIcon.svelte';
     import Breadcrumbs from '@/components/Breadcrumbs.svelte';
+    import TeamSwitcher from '@/components/TeamSwitcher.svelte';
     import {
         Avatar,
         AvatarFallback,
@@ -43,7 +44,7 @@
     import { getInitials } from '@/lib/initials';
     import { toUrl } from '@/lib/utils';
     import { dashboard } from '@/routes';
-    import type { BreadcrumbItem, NavItem } from '@/types';
+    import type { BreadcrumbItem, NavItem, Team } from '@/types';
 
     let {
         breadcrumbs = [],
@@ -52,18 +53,23 @@
     } = $props();
 
     const auth = $derived(page.props.auth);
+    const currentTeam = $derived(page.props.currentTeam as Team | null);
+    const dashboardUrl = $derived(
+        currentTeam ? dashboard(currentTeam.slug) : '/',
+    );
+
     const url = currentUrlState();
 
     const activeItemStyles =
         'text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100';
 
-    const mainNavItems: NavItem[] = [
+    const mainNavItems = $derived<NavItem[]>([
         {
             title: 'Dashboard',
-            href: dashboard(),
+            href: dashboardUrl,
             icon: LayoutGrid,
         },
-    ];
+    ]);
 
     const rightNavItems: NavItem[] = [
         {
@@ -82,7 +88,6 @@
 <div>
     <div class="border-b border-sidebar-border/80">
         <div class="mx-auto flex h-16 items-center px-4 md:max-w-7xl">
-            <!-- Mobile Menu -->
             <div class="lg:hidden">
                 <Sheet>
                     <SheetTrigger asChild>
@@ -146,11 +151,10 @@
                 </Sheet>
             </div>
 
-            <Link href={toUrl(dashboard())} class="flex items-center gap-x-2">
+            <Link href={dashboardUrl} class="flex items-center gap-x-2">
                 <AppLogo />
             </Link>
 
-            <!-- Desktop Menu -->
             <div class="hidden h-full lg:flex lg:flex-1">
                 <NavigationMenu class="ml-10 flex h-full items-stretch">
                     <NavigationMenuList
@@ -242,27 +246,27 @@
                                 <Avatar
                                     class="size-8 overflow-hidden rounded-full"
                                 >
-                                    {#if auth.user?.avatar}
+                                    {#if auth.user.avatar}
                                         <AvatarImage
                                             src={auth.user.avatar}
-                                            alt={auth.user?.name}
+                                            alt={auth.user.name}
                                         />
                                     {/if}
                                     <AvatarFallback
                                         class="rounded-lg bg-neutral-200 font-semibold text-black dark:bg-neutral-700 dark:text-white"
                                     >
-                                        {getInitials(auth.user?.name ?? '')}
+                                        {getInitials(auth.user?.name)}
                                     </AvatarFallback>
                                 </Avatar>
                             </Button>
                         {/snippet}
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" class="w-56">
-                        {#if auth.user}
-                            <UserMenuContent user={auth.user} />
-                        {/if}
+                        <UserMenuContent user={auth.user} />
                     </DropdownMenuContent>
                 </DropdownMenu>
+
+                <TeamSwitcher inHeader={true} />
             </div>
         </div>
     </div>
