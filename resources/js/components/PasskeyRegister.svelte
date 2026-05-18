@@ -1,0 +1,95 @@
+<script lang="ts">
+    import { usePasskeyRegister } from '@laravel/passkeys/svelte';
+    import InputError from '@/components/InputError.svelte';
+    import { Button } from '@/components/ui/button';
+    import { Input } from '@/components/ui/input';
+    import { Label } from '@/components/ui/label';
+
+    let {
+        onSuccess,
+    }: {
+        onSuccess?: () => void;
+    } = $props();
+
+    const getDefaultPasskeyName = () => {
+        const ua = navigator.userAgent;
+
+        const browser = ['Chrome', 'Firefox', 'Safari', 'Edge', 'Opera'].find(
+            (browser) => new RegExp(browser).test(ua),
+        );
+
+        const os = ['iPhone', 'iPad', 'Android', 'Mac', 'Windows'].find((os) =>
+            new RegExp(os).test(ua),
+        );
+
+        return [browser, os].filter(Boolean).join(' on ') || '';
+    };
+
+    let name = $state(getDefaultPasskeyName());
+    let showForm = $state(false);
+    const { register, isLoading, error, isSupported } = usePasskeyRegister({
+        onSuccess: () => {
+            name = '';
+            showForm = false;
+            onSuccess?.();
+        },
+    });
+
+    const handleSubmit = async (event: SubmitEvent) => {
+        event.preventDefault();
+
+        if (!name.trim()) {
+            return;
+        }
+
+        await register(name.trim());
+    };
+
+    const handleCancel = () => {
+        showForm = false;
+        name = '';
+    };
+</script>
+
+{#if !isSupported}
+    <div class="text-sm text-muted-foreground">
+        Passkeys are not supported in this browser.
+    </div>
+{:else if !showForm}
+    <Button variant="outline" onclick={() => (showForm = true)}>
+        Add passkey
+    </Button>
+{:else}
+    <form
+        onsubmit={handleSubmit}
+        class="space-y-4 rounded-lg border border-border bg-muted/50 p-4"
+    >
+        <div class="grid gap-2">
+            <Label for="passkey-name">Passkey name</Label>
+            <Input
+                id="passkey-name"
+                type="text"
+                bind:value={name}
+                placeholder="e.g., MacBook Pro, iPhone"
+                class="mt-1 block w-full border-foreground/20"
+                autofocus
+            />
+            <p class="text-xs text-muted-foreground">
+                A name helps you identify this passkey later.
+            </p>
+        </div>
+
+        {#if error}
+            <InputError message={error} />
+        {/if}
+
+        <div class="flex gap-2">
+            <Button type="submit" disabled={isLoading || !name.trim()}>
+                {isLoading ? 'Registering...' : 'Register passkey'}
+            </Button>
+            <Button type="button" variant="ghost" onclick={handleCancel}>
+                Cancel
+            </Button>
+        </div>
+    </form>
+{/if}
