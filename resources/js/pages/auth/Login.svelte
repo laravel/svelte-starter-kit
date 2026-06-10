@@ -10,6 +10,10 @@
     import AppHead from '@/components/AppHead.svelte';
     import InputError from '@/components/InputError.svelte';
     import PasswordInput from '@/components/PasswordInput.svelte';
+    /* @chisel-passkeys */
+    import PasskeyVerify from '@/components/PasskeyVerify.svelte';
+    /* @end-chisel-passkeys */
+    import TeamInvitationAlert from '@/components/TeamInvitationAlert.svelte';
     import TextLink from '@/components/TextLink.svelte';
     import { Button } from '@/components/ui/button';
     import { Checkbox } from '@/components/ui/checkbox';
@@ -21,16 +25,16 @@
     /* @end-chisel-registration */
     import { store } from '@/routes/login';
     import { request } from '@/routes/password';
-    /* @chisel-passkeys */
-    import PasskeyVerify from '@/components/PasskeyVerify.svelte';
-    /* @end-chisel-passkeys */
+    import type { TeamInvitationContext } from '@/types';
 
     let {
         status = '',
         canResetPassword,
+        teamInvitation = null,
     }: {
         status?: string;
         canResetPassword: boolean;
+        teamInvitation?: TeamInvitationContext | null;
     } = $props();
 </script>
 
@@ -40,6 +44,10 @@
     <div class="mb-4 text-center text-sm font-medium text-green-600">
         {status}
     </div>
+{/if}
+
+{#if teamInvitation}
+    <TeamInvitationAlert invitation={teamInvitation} action="Log in" />
 {/if}
 
 <!-- @chisel-passkeys -->
@@ -71,7 +79,7 @@
                     <Label for="password">Password</Label>
                     {#if canResetPassword}
                         <TextLink href={request()} class="text-sm">
-                            Forgot your password?
+                            Forgot password?
                         </TextLink>
                     {/if}
                 </div>
@@ -106,7 +114,16 @@
         <!-- @chisel-registration -->
         <div class="text-center text-sm text-muted-foreground">
             Don't have an account?
-            <TextLink href={register()}>Sign up</TextLink>
+            <TextLink
+                href={register({
+                    query: {
+                        invitation: teamInvitation?.code,
+                    },
+                })}
+                data-test="register-link"
+            >
+                Sign up
+            </TextLink>
         </div>
         <!-- @end-chisel-registration -->
     {/snippet}

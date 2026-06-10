@@ -10,6 +10,7 @@
     import AppHead from '@/components/AppHead.svelte';
     import InputError from '@/components/InputError.svelte';
     import PasswordInput from '@/components/PasswordInput.svelte';
+    import TeamInvitationAlert from '@/components/TeamInvitationAlert.svelte';
     import TextLink from '@/components/TextLink.svelte';
     import { Button } from '@/components/ui/button';
     import { Input } from '@/components/ui/input';
@@ -17,11 +18,22 @@
     import { Spinner } from '@/components/ui/spinner';
     import { login } from '@/routes';
     import { store } from '@/routes/register';
+    import type { TeamInvitationContext } from '@/types';
 
-    let { passwordRules }: { passwordRules: string } = $props();
+    let {
+        passwordRules,
+        teamInvitation = null,
+    }: {
+        passwordRules: string;
+        teamInvitation?: TeamInvitationContext | null;
+    } = $props();
 </script>
 
 <AppHead title="Register" />
+
+{#if teamInvitation}
+    <TeamInvitationAlert invitation={teamInvitation} action="Register" />
+{/if}
 
 <Form
     {...store.form()}
@@ -95,7 +107,17 @@
 
         <div class="text-center text-sm text-muted-foreground">
             Already have an account?
-            <TextLink href={login()} class="underline underline-offset-4">
+            <TextLink
+                href={teamInvitation
+                    ? login.url({
+                          query: {
+                              invitation: teamInvitation.code,
+                          },
+                      })
+                    : login()}
+                class="underline underline-offset-4"
+                data-test="team-invitation-login-link"
+            >
                 Log in
             </TextLink>
         </div>
